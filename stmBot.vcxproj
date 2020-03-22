@@ -42,12 +42,14 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|VisualGDB'">
     <ClCompile>
-      <CPPLanguageStandard>GNUPP14</CPPLanguageStandard>
+      <CPPLanguageStandard>CPP14</CPPLanguageStandard>
       <AdditionalIncludeDirectories>../stmAPP/stmAPP;../stmCPP/stmCPP/f1;../../../qpcpp;.;C:\Users\thara\ETL\etl-16.5.2\include;%(ClCompile.AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions />
       <CLanguageStandard />
       <DumpStackUsage>true</DumpStackUsage>
+      <InputLanguage>Cpp</InputLanguage>
+      <VerboseMode>false</VerboseMode>
     </ClCompile>
     <Link>
       <AdditionalLinkerInputs>;%(Link.AdditionalLinkerInputs)</AdditionalLinkerInputs>
@@ -63,7 +65,17 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|VisualGDB'">
     <ClCompile>
       <CPPLanguageStandard>GNUPP14</CPPLanguageStandard>
+      <AdditionalIncludeDirectories>../stmAPP/stmAPP;../stmCPP/stmCPP/f1;../../../qpcpp;.;../../../../ETL/etl-16.5.2/include;%(ClCompile.AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG=1;RELEASE=1;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalLinkerInputs>;%(Link.AdditionalLinkerInputs)</AdditionalLinkerInputs>
+      <LibrarySearchDirectories>;%(Link.LibrarySearchDirectories)</LibrarySearchDirectories>
+      <AdditionalLibraryNames>;%(Link.AdditionalLibraryNames)</AdditionalLibraryNames>
+      <LinkerScript />
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>map_output_release</MapFileName>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\stmAPP\stmAPP.vcxproj">
@@ -117,8 +129,8 @@
     <ClInclude Include="..\..\..\qpcpp\qxthread.hpp" />
     <ClInclude Include="..\..\..\qpcpp\stdint_c.h" />
     <ClInclude Include="stm32f1xx_it.h" />
+    <None Include=".gitignore" />
     <None Include="stm32.props" />
-    <ClCompile Include="$(BSP_ROOT)\STM32F1xxxx\StartupFiles\startup_stm32f103xb.c" />
     <ClInclude Include="bsp.h" />
     <ClInclude Include="stm32f1xx_hal_conf.h" />
     <None Include="stmBot-Debug.vgdbsettings" />
@@ -133,6 +145,7 @@
     <ClInclude Include="$(EFP_BASE)\Profiler\ProfilerFreeRTOSHooks.h" />
     <ClInclude Include="$(EFP_BASE)\Profiler\CustomRealTimeWatches.h" />
     <ClInclude Include="$(EFP_BASE)\Profiler\DebuggerChecker.h" />
+    <ClCompile Include="$(EFP_BASE)\Profiler\TestResourceManager.cpp" />
     <ClCompile Include="$(BSP_ROOT)\STM32F1xxxx\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal.c" />
     <ClCompile Include="$(BSP_ROOT)\STM32F1xxxx\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_adc.c" />
     <ClCompile Include="$(BSP_ROOT)\STM32F1xxxx\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_adc_ex.c" />

@@ -8,3 +8,5 @@ VisualGDB
 .vs
 VisualGDBCache
 CodeDB
+map_output
+map_output_release

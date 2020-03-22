@@ -6,20 +6,23 @@
 #include "stmClock/stmClock.h"
 #include "stmPin/stmPin.h"
 
-#include <SysprogsProfiler.h>
+//#include <SysprogsProfiler.h>
 
 volatile uint32_t sysTicks = 0;
 
 /* Active objects from stmAPP */
-stmAPP::BlinkLED LED1(GPIO_INSTANCE::GPIO_C, PIN::PIN_13, 500, 500, true);
-// stmAPP::BlinkLED LED1(GPIOB, PIN::PIN_12, true);
+constexpr auto ledPin1 = stmapp::BlinkLED::constructLEDPin(GPIO_INSTANCE::GPIO_C, PIN::PIN_13);
+constexpr auto blinkLed1Struct = stmapp::BlinkLED::constructConstantBlinkingLEDStruct(500, true);
+stmapp::BlinkLED LED1(&ledPin1, &blinkLed1Struct);
 QP::QActive *const Blink1 = &LED1;
 
-//stmAPP::BlinkLED LED2(GPIO_INSTANCE::GPIO_C, PIN::PIN_13, true);
-stmAPP::BlinkLED LED2(GPIO_INSTANCE::GPIO_B, PIN::PIN_12, true);
+constexpr auto ledPin2 = stmapp::BlinkLED::constructLEDPin(GPIO_INSTANCE::GPIO_B, PIN::PIN_12);
+constexpr auto blinkLed2Struct = stmapp::BlinkLED::constructLEDStruct(true);
+stmapp::BlinkLED LED2(&ledPin2, &blinkLed2Struct);
 QP::QActive *const Blink2 = &LED2;
 
-stmAPP::PushButton Button1(GPIO_INSTANCE::GPIO_A, PIN::PIN_5, 20);
+constexpr auto buttonPin1 = stmapp::PushButton::constructButtonInstance(GPIO_INSTANCE::GPIO_A, PIN::PIN_5);
+stmapp::PushButton Button1(&buttonPin1, 18);
 QP::QActive *const PushButton1 = &Button1;
 /* Active objects from stmAPP */
 
@@ -32,25 +35,24 @@ enum AO_PRIORITY : uint8_t
 
 int main(void)
 {
-	//InitializeSamplingProfiler ();
 	BSP::initBoard();
 	//BSP::initClock();
 
 	/** User defined Event structs */
-	static stmAPP::BlinkLEDEvent highEvent;
-	highEvent.sig = stmAPP::ON_LED_SIG;
+	static stmapp::BlinkLEDEvent highEvent;
+	highEvent.sig = stmapp::ON_LED_SIG;
 	highEvent.poolId_ = 0;
 	highEvent.refCtr_ = 0;
 	highEvent.priority = AO_PRIORITY::BLINK_LED_WITH_TIMER;
 
-	static stmAPP::BlinkLEDEvent lowEvent;
-	lowEvent.sig = stmAPP::OFF_LED_SIG;
+	static stmapp::BlinkLEDEvent lowEvent;
+	lowEvent.sig = stmapp::OFF_LED_SIG;
 	lowEvent.poolId_ = 0;
 	lowEvent.refCtr_ = 0;
 	lowEvent.priority = AO_PRIORITY::BLINK_LED_WITH_TIMER;
 
-	static stmAPP::BlinkLEDEvent restartTimerEvent;
-	restartTimerEvent.sig = stmAPP::RESTART_TIMER_SIG;
+	static stmapp::BlinkLEDEvent restartTimerEvent;
+	restartTimerEvent.sig = stmapp::RESTART_TIMER_SIG;
 	restartTimerEvent.poolId_ = 0;
 	restartTimerEvent.refCtr_ = 0;
 	restartTimerEvent.priority = AO_PRIORITY::BLINK_LED_WITH_TIMER;
@@ -72,7 +74,7 @@ int main(void)
 
 	/** Event pool array definition */
 	// static QF_MPOOL_EL(stmAPP::BlinkLED) smlPoolStore[20];
-	static QF_MPOOL_EL(stmAPP::PushButton) buttonPoolStore[15];
+	static QF_MPOOL_EL(stmapp::PushButton) buttonPoolStore[15];
 	/** Event pool array initializations */
 
 	/* initialize the framework and the Vanilla scheduler 'qv' */
