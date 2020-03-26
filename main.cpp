@@ -1,30 +1,36 @@
-#include "blinkLED/blinkLED.h"
-#include "bsp.h"
-#include "pushButton/pushButton.h"
 #include "qpcpp.hpp"
-#include "stm32f1xx_it.h"
-#include "stmClock/stmClock.h"
-#include "stmPin/stmPin.h"
 
-//#include <SysprogsProfiler.h>
+#include "etl/memory.h"
+
+#include "bsp.h"
+
+#include "blinkLED/blinkLED.h"
+#include "pushButton/pushButton.h"
+#include "stm_app.h"
 
 volatile uint32_t sysTicks = 0;
 
-/* Active objects from stmAPP */
+enum class STMAPP_SIGNALS : QP::QSignal
+{
+	NULL_SIGNALS = stmapp::APP_START_SIGNAL,
+	LED_ON_SIGNAL,
+	LED_OFF_SIGNAL,
+};
+
+/* Setting structs */
 constexpr auto ledPin1 = stmapp::BlinkLED::constructLEDPin(GPIO_INSTANCE::GPIO_C, PIN::PIN_13);
-constexpr auto blinkLed1Struct = stmapp::BlinkLED::constructConstantBlinkingLEDStruct(500, true);
-stmapp::BlinkLED LED1(&ledPin1, &blinkLed1Struct);
-QP::QActive *const Blink1 = &LED1;
+constexpr auto blinkLed1Struct = stmapp::BlinkLED::constructVariableBlinkingLEDStruct(500, 1000);
 
 constexpr auto ledPin2 = stmapp::BlinkLED::constructLEDPin(GPIO_INSTANCE::GPIO_B, PIN::PIN_12);
-constexpr auto blinkLed2Struct = stmapp::BlinkLED::constructLEDStruct(true);
-stmapp::BlinkLED LED2(&ledPin2, &blinkLed2Struct);
-QP::QActive *const Blink2 = &LED2;
+constexpr auto blinkLed2Struct = stmapp::BlinkLED::constructLEDStruct(true,
+																	  STMAPP_SIGNALS::LED_ON_SIGNAL,
+																	  STMAPP_SIGNALS::LED_OFF_SIGNAL);
 
-constexpr auto buttonPin1 = stmapp::PushButton::constructButtonInstance(GPIO_INSTANCE::GPIO_A, PIN::PIN_5);
-stmapp::PushButton Button1(&buttonPin1, 18);
-QP::QActive *const PushButton1 = &Button1;
-/* Active objects from stmAPP */
+const auto buttonReleasedEvent = QP::QEvt{
+	stmapp::castToQPSignal(STMAPP_SIGNALS::LED_ON_SIGNAL), 0, 0};
+constexpr auto buttonStruct = stmapp::PushButton::constructButtonWithReleasedEventOnly(25, &buttonReleasedEvent);
+constexpr auto buttonPin1 = stmapp::PushButton::constructButtonInstance(GPIO_INSTANCE::GPIO_A, PIN::PIN_4);
+/* Setting structs */
 
 enum AO_PRIORITY : uint8_t
 {
@@ -35,32 +41,17 @@ enum AO_PRIORITY : uint8_t
 
 int main(void)
 {
+
+	/* Active objects from stmAPP */
+	stmapp::BlinkLED LED1(&ledPin1, &blinkLed1Struct);
+	QP::QActive *const Blink1 = &LED1;
+	stmapp::BlinkLED LED2(&ledPin2, &blinkLed2Struct);
+	QP::QActive *const Blink2 = &LED2;
+	stmapp::PushButton Button1(&buttonPin1, &buttonStruct);
+	QP::QActive *const PushButton1 = &Button1;
+	/* Active objects from stmAPP */
+
 	BSP::initBoard();
-	//BSP::initClock();
-
-	/** User defined Event structs */
-	static stmapp::BlinkLEDEvent highEvent;
-	highEvent.sig = stmapp::ON_LED_SIG;
-	highEvent.poolId_ = 0;
-	highEvent.refCtr_ = 0;
-	highEvent.priority = AO_PRIORITY::BLINK_LED_WITH_TIMER;
-
-	static stmapp::BlinkLEDEvent lowEvent;
-	lowEvent.sig = stmapp::OFF_LED_SIG;
-	lowEvent.poolId_ = 0;
-	lowEvent.refCtr_ = 0;
-	lowEvent.priority = AO_PRIORITY::BLINK_LED_WITH_TIMER;
-
-	static stmapp::BlinkLEDEvent restartTimerEvent;
-	restartTimerEvent.sig = stmapp::RESTART_TIMER_SIG;
-	restartTimerEvent.poolId_ = 0;
-	restartTimerEvent.refCtr_ = 0;
-	restartTimerEvent.priority = AO_PRIORITY::BLINK_LED_WITH_TIMER;
-	/** User defined Event structs */
-
-	//Button1.setReleasedEvent(&lowEvent);
-	Button1.setReleasedEvent(&restartTimerEvent);
-	Button1.setPressedEvent(&lowEvent);
 
 	/* Active object event queues */
 	static QP::QEvt const *led1QueueStore[10];
@@ -69,12 +60,12 @@ int main(void)
 	/* Active object event queues */
 
 	/* Subscriber list array */
-	static QP::QSubscrList subscribeTo[20];
+	static QP::QSubscrList subscribeTo[15];
 	/* Subscriber list array */
 
 	/** Event pool array definition */
 	// static QF_MPOOL_EL(stmAPP::BlinkLED) smlPoolStore[20];
-	static QF_MPOOL_EL(stmapp::PushButton) buttonPoolStore[15];
+	static QF_MPOOL_EL(stmapp::PushButton) buttonPoolStore[10];
 	/** Event pool array initializations */
 
 	/* initialize the framework and the Vanilla scheduler 'qv' */
