@@ -36,8 +36,15 @@
 #include "qpcpp.hpp"
 #include "stm32f1xx.h"
 #include "stmClock/stmClock.h"
+#include "stmEXTI/stm_exti.h"
+#include "stmTimer/stm_timer.h"
 
 #include "bsp.h"
+
+extern const stmcpp::TimeBaseInterruptGenerator *ultrasonic_trigger_timer_ptr;
+
+//extern const stmcpp::ExternalInterrupt *echo_interrupt_ptr;
+extern const stmcpp::CollectionExternalInterrupt<EXTI_LINE_5_9> *echo_interrupt_ptr;
 
 /* USER CODE BEGIN 0 */
 
@@ -209,6 +216,21 @@ void USART3_IRQHandler(void)
 
 void DMA_Channel2_IRQHandler(void)
 {
+}
+
+void TIM3_IRQHandler(void)
+{
+	ultrasonic_trigger_timer_ptr->serviceInterrupt();
+}
+
+void EXTI0_IRQHandler(void)
+{
+	//echo_interrupt_ptr->serviceInterrupt();
+}
+
+void EXTI9_5_IRQHandler(void)
+{
+	echo_interrupt_ptr->serviceInterrupt();
 }
 
 /* USER CODE END 1 */

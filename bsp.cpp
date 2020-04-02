@@ -4,28 +4,13 @@
 #include "stmClock/stmClock.h"
 #include "qpcpp.hpp"
 #include "core_cm3.h"
+#include "stmTimer/stm_timer.h"
+#include "stmEXTI/stm_exti.h"
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!! CAUTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Assign a priority to EVERY ISR explicitly by calling NVIC_SetPriority().
-// DO NOT LEAVE THE ISR PRIORITIES AT THE DEFAULT VALUE!
-//
-enum KernelUnawareISRs {
-	// see NOTE00
-   // ...
-   MAX_KERNEL_UNAWARE_CMSIS_PRI  // keep always last
-}
-;
-// "kernel-unaware" interrupts can't overlap "kernel-aware" interrupts
-Q_ASSERT_COMPILE (MAX_KERNEL_UNAWARE_CMSIS_PRI <= QF_AWARE_ISR_CMSIS_PRI);
-
-enum KernelAwareISRs {
-	SYSTICK_PRIO = QF_AWARE_ISR_CMSIS_PRI, 
-	// see NOTE00
-   // ...
-   MAX_KERNEL_AWARE_CMSIS_PRI // keep always last
-};
-// "kernel-aware" interrupts should not overlap the PendSV priority
-Q_ASSERT_COMPILE (MAX_KERNEL_AWARE_CMSIS_PRI <= (0xFF >> (8 - __NVIC_PRIO_BITS)));
+extern const stmcpp::TimeBaseInterruptGenerator *ultrasonic_trigger_timer_ptr;
+//extern const stmcpp::ExternalInterrupt *echo_interrupt_ptr;
+extern const stmcpp::CollectionExternalInterrupt<EXTI_LINE_5_9> *echo_interrupt_ptr;
+extern const stmcpp::DigitalOut *ultrasonic_trigger_pin_ptr;
 
 void BSP::initBoard () {
     
@@ -53,7 +38,7 @@ void BSP::initBoard () {
 
 void BSP::initClock ()
 {
-	setNVICPriorityGroup (NVIC_PRIORITY_GROUP_4);
+	stmcortexfunction::setNVICPriorityGroup (NVIC_PRIORITY_GROUP_4);
 
 	InitTick (SystemCoreClock, 1000);
 
@@ -73,6 +58,12 @@ namespace QP {
 	void QF::onStartup (void) 
 	{  
 		BSP::initClock ();
+		ultrasonic_trigger_pin_ptr->setup();
+		ultrasonic_trigger_timer_ptr->setup();
+		ultrasonic_trigger_timer_ptr->enable();
+
+		echo_interrupt_ptr->setup();
+		echo_interrupt_ptr->enable();
 	} 
 
 	void QF::onCleanup () 
