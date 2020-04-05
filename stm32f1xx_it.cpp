@@ -38,6 +38,7 @@
 #include "stmClock/stmClock.h"
 #include "stmEXTI/stm_exti.h"
 #include "stmTimer/stm_timer.h"
+#include "stmUSART/stmUSART.h"
 
 #include "bsp.h"
 
@@ -45,6 +46,8 @@ extern const stmcpp::TimeBaseInterruptGenerator *ultrasonic_trigger_timer_ptr;
 
 //extern const stmcpp::ExternalInterrupt *echo_interrupt_ptr;
 extern const stmcpp::CollectionExternalInterrupt<EXTI_LINE_5_9> *echo_interrupt_ptr;
+
+extern const stmcpp::UARTInterrupt *serial_ptr;
 
 /* USER CODE BEGIN 0 */
 
@@ -212,6 +215,7 @@ void SysTick_Handler(void)
 
 void USART3_IRQHandler(void)
 {
+	//doesnt work investigate Pin integrity
 }
 
 void DMA_Channel2_IRQHandler(void)
@@ -231,6 +235,16 @@ void EXTI0_IRQHandler(void)
 void EXTI9_5_IRQHandler(void)
 {
 	echo_interrupt_ptr->serviceInterrupt();
+}
+
+void USART1_IRQHandler(void)
+{
+	//serial_ptr->serviceInterrupt();
+}
+
+void USART2_IRQHandler(void)
+{
+	serial_ptr->serviceInterrupt();
 }
 
 /* USER CODE END 1 */

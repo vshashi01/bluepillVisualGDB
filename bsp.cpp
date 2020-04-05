@@ -6,11 +6,13 @@
 #include "core_cm3.h"
 #include "stmTimer/stm_timer.h"
 #include "stmEXTI/stm_exti.h"
+#include "stmUSART/stmUSART.h"
 
 extern const stmcpp::TimeBaseInterruptGenerator *ultrasonic_trigger_timer_ptr;
 //extern const stmcpp::ExternalInterrupt *echo_interrupt_ptr;
 extern const stmcpp::CollectionExternalInterrupt<EXTI_LINE_5_9> *echo_interrupt_ptr;
 extern const stmcpp::DigitalOut *ultrasonic_trigger_pin_ptr;
+extern const stmcpp::UARTInterrupt *serial_ptr;
 
 void BSP::initBoard () {
     
@@ -64,6 +66,10 @@ namespace QP {
 
 		echo_interrupt_ptr->setup();
 		echo_interrupt_ptr->enable();
+
+		//serial_ptr->setup(72000000); //If using USART 1
+		serial_ptr->setup(36000000);
+		serial_ptr->enable();
 	} 
 
 	void QF::onCleanup () 

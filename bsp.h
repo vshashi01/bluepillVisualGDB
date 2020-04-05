@@ -37,6 +37,7 @@ enum KernelAwareISRs
 	SYSTICK_PRIO = QF_AWARE_ISR_CMSIS_PRI,
 	TIM3_PRIO,
 	ECHO_RECEIVE_PRIO,
+	BT_PRIO,
 	// see NOTE00
 	// ...
 	MAX_KERNEL_AWARE_CMSIS_PRI // keep always last

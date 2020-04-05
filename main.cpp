@@ -8,6 +8,7 @@
 #include "pushButton/pushButton.h"
 #include "stmEXTI/stm_exti.h"
 #include "stmTimer/stm_timer.h"
+#include "stmUSART/stmUSART.h"
 #include "stm_app.h"
 
 void echo_callback(void);
@@ -66,6 +67,18 @@ constexpr auto ultrasonic_trigger_timer = stmcpp::TimeBaseInterruptGenerator::co
 
 const stmcpp::TimeBaseInterruptGenerator *ultrasonic_trigger_timer_ptr = &ultrasonic_trigger_timer;
 /* Testing the ultrasonic sensor with interrupts and timer interrupts */
+
+/* Setting up UART */
+
+void process_message(etl::istring *const);
+
+auto transmit_buffer = etl::string<200>();
+auto receive_buffer = etl::string<128>();
+
+constexpr auto bluetooth = stmcpp::UARTInterrupt(USART_INSTANCE::USART_2, 115200, BT_PRIO,
+												 &transmit_buffer, &receive_buffer, &process_message);
+
+const stmcpp::UARTInterrupt *serial_ptr = &bluetooth;
 
 /* Setting structs */
 
@@ -158,4 +171,14 @@ void ultrasonic_trigger_callback(void)
 	ultrasonic_trigger_pin.high();
 	delay_us(10);
 	ultrasonic_trigger_pin.low();
+}
+
+void process_message(etl::istring *const message)
+{
+	stmcpp::UARTInterrupt::pushStringIntoTransmitBuffer(
+		&transmit_buffer, etl::make_string("+OK"));
+	stmcpp::UARTInterrupt::pushStringIntoTransmitBuffer(
+		&transmit_buffer, receive_buffer);
+
+	bluetooth.transmit();
 }
